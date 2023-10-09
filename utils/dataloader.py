@@ -34,7 +34,8 @@ class NBADataset(Dataset):
         # 切片不取最后一个时间步，因为最后一个时间步的输出是下一个时间步的输入
         # time_start = time()
         adjacency_matrix = torch.FloatTensor(
-            self.adjacency_matrices[idx : idx + self.window_size - 1]
+            # self.adjacency_matrices[idx : idx + self.window_size - 1]
+            self.adjacency_matrices[idx]
         )
         node_attribute = torch.FloatTensor(
             self.node_attributes[idx : idx + self.window_size - 1]
@@ -71,7 +72,7 @@ def collate_fn(batch):
     sample = {
         "adjacency_matrix": adjacency_matrix,
         "node_attribute": node_attribute,
-        "exist_table": sample["exist_table"],
+        "exist_table": batch[0]["exist_table"],
         "target": target,
     }
     # time_end = time()
@@ -89,4 +90,6 @@ def get_dataloader(args, num_workers=os.cpu_count()):
         num_workers=num_workers,
         pin_memory=True,
     )
+    args.num_nodes = dataset.node_attributes.shape[1]
+    args.num_attributes = dataset.node_attributes.shape[2]
     return dataloader
